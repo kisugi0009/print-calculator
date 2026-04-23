@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>印刷計算機</title>
+<title>紙張令數・版數・台數計算機</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -16,7 +16,7 @@
     --accent: #e8c97a;
     --accent2: #c9a84c;
     --text: #f0ede6;
-    --muted: #888;
+    --muted: #aaa;
     --result-bg: #1a1a12;
     --result-border: #4a3f1a;
   }
@@ -132,11 +132,11 @@
   }
 
   label {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: #bbb;
   }
 
   input[type="number"] {
@@ -243,9 +243,9 @@
   }
 
   .result-label {
-    font-size: 12px;
-    letter-spacing: 0.1em;
-    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    color: #bbb;
     white-space: nowrap;
   }
 
@@ -302,8 +302,8 @@
   }
 
   .hint {
-    font-size: 11px;
-    color: #555;
+    font-size: 12px;
+    color: #666;
     margin-top: 10px;
     font-style: italic;
   }
@@ -347,8 +347,12 @@
   }
 
   @media (max-width: 480px) {
-    h1 { font-size: 26px; }
+    h1 { font-size: 22px; }
     .banfei-grid, .banfei-result-grid { grid-template-columns: 1fr; }
+    .input-grid { grid-template-columns: 1fr; }
+    .section-body { padding: 16px; }
+    .section-header { padding: 14px 16px; }
+    .result-value { font-size: 22px; }
   }
 </style>
 </head>
@@ -363,7 +367,7 @@
   <div class="section">
     <div class="section-header">
       <span class="section-num">01</span>
-      <span class="section-title">紙張令數</span>
+      <span class="section-title">紙張令數（不含放損）</span>
     </div>
     <div class="section-body">
       <div class="input-grid">
@@ -393,6 +397,19 @@
       <div class="result-row">
         <span class="result-label">所需令數</span>
         <span class="result-value" id="p1-result">—<span class="result-unit">令</span></span>
+      </div>
+      <hr class="divider">
+      <div class="field" style="margin-bottom:16px;">
+        <label>放損張數</label>
+        <div class="kaisu-custom-wrap">
+          <input type="number" id="p1-loss" min="0" placeholder="填入放損張數" oninput="calcPaper()" style="width:100%;">
+          <span class="kaisu-custom-label">張</span>
+        </div>
+        <p class="hint" style="margin-top:6px;">放損數量依印刷廠為準，1令 = 500張</p>
+      </div>
+      <div class="result-row" id="p1-total-row" style="opacity:0.4;">
+        <span class="result-label">含放損合計</span>
+        <span class="result-value" id="p1-total">—<span class="result-unit">令</span></span>
       </div>
       <p class="hint">公式：(頁數 ÷ 2 × 份數) ÷ (開數 × 500)</p>
     </div>
@@ -546,9 +563,20 @@
     const pages = parseFloat(document.getElementById('p1-pages').value) || 0;
     const copies = parseFloat(document.getElementById('p1-copies').value) || 0;
     const kaisu = parseFloat(document.getElementById('p1-kaisu').value) || 8;
+    const loss = document.getElementById('p1-loss').value;
+
     const result = ((pages / 2) * copies) / (kaisu * 500);
-    const el = document.getElementById('p1-result');
-    el.innerHTML = `${fmt(result)}<span class="result-unit">令</span>`;
+    document.getElementById('p1-result').innerHTML = `${fmt(result)}<span class="result-unit">令</span>`;
+
+    const totalRow = document.getElementById('p1-total-row');
+    if (loss !== '') {
+      const total = result + parseFloat(loss) / 500;
+      document.getElementById('p1-total').innerHTML = `${fmt(total)}<span class="result-unit">令</span>`;
+      totalRow.style.opacity = '1';
+    } else {
+      document.getElementById('p1-total').innerHTML = `—<span class="result-unit">令</span>`;
+      totalRow.style.opacity = '0.4';
+    }
   }
 
   let p2BanType = null; // 'bw' | 'color' | null
